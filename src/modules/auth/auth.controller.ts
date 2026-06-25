@@ -29,6 +29,7 @@ export class AuthController {
     return req.logout();
   }
 
+  @UseGuards(LocalAuthGuard)
   @Get('test-seguridad')
     probarRutaProtegida(@Request() req) {
       return {
