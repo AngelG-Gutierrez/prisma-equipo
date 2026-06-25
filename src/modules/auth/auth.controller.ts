@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -28,4 +28,12 @@ export class AuthController {
   async logout(@Request() req) {
     return req.logout();
   }
+
+  @Get('test-seguridad')
+    probarRutaProtegida(@Request() req) {
+      return {
+        mensaje: '¡Éxito! Lograste entrar al área restringida de SINERGIA APP.',
+        datosDecodificados: req.user,
+      };
+    }
 }
