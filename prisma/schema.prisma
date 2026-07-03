@@ -26,3 +26,16 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime?
 }
+
+model Prescription {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  exerciseName String   // Nombre del ejercicio
+  description  String   @db.Text // Descripción
+  frequency    String   // Frecuencia / repeticiones
+  mediaUrl     String?  // Multimedia (integración de API externa)
+
+  createdAt    DateTime @default(now())
+}
