@@ -25,4 +25,25 @@ model User {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime?
+
+  // Relaciones inversas
+  appointments PatientAppointment[] // Citas como paciente
+  doctorAppointments DoctorAppointment[] // Citas asignadas si es Admin/Fisio
+  medicalRecord MedicalRecord?     // Expediente clínico (uno a uno)
+  prescriptions Prescription[]     // Planes de ejercicio asignados
 }
+
+// SIN-13 & RF_13: Expediente Clínico (Relación 1 a 1 con Paciente)
+model MedicalRecord {
+  id           String   @id @default(cuid())
+  patientId    String   @unique
+  patient      User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  diagnosis    String   @db.Text // diagnóstico
+  history      String   @db.Text // antecedentes
+  evolution    String   @db.Text // observaciones / evolución
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
