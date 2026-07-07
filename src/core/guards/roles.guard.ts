@@ -4,7 +4,6 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  // Inyectamos Reflector para poder leer la metadata que pusimos con el decorador @Roles
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -23,7 +22,7 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user; // Este user viene de tu JwtStrategy
     
-    // 3. Verificamos que el usuario exista (por seguridad extra)
+    // 3. Verificamos que el usuario exista
     if (!user) {
         throw new ForbiddenException('Usuario no autenticado en el sistema.');
     }
