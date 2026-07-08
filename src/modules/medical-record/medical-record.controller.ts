@@ -1,19 +1,21 @@
-import { Controller, Post, Body, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Patch, Body, Param, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Ajusta la ruta según tu árbol de carpetas
 
-@Controller('medical-records')
+@Controller('create-medical-records')
 export class MedicalRecordsController {
   constructor(private readonly medicalRecordsService: MedicalRecordService) {}
 
-  // Ticket 1: Crear expediente
+  // TICKET 1: Crear expediente
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard) // El guard de tu equipo valida que esté logueado
   async create(@Body() createDto: CreateMedicalRecordDto, @Req() req: any) {
+    // El JwtAuthGuard guarda al usuario logueado en req.user
     const user = req.user; 
 
-    //No cree guards nuevos para ver el rol del usuario, por lo que lo hago con esta sentencia
+    // Validamos si es Administrador (revisa si en tu DB es "Admin", "Administrador", etc.)
     if (user.role !== 'Administrador') {
       throw new UnauthorizedException('Solo los administradores pueden crear expedientes clínicos.');
     }
