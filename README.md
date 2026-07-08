@@ -1,55 +1,69 @@
-# SISDEGUA: Sistema de Detección de Desbordamientos de Agua
+# SINERGIA APP: API de Gestión Clínica y Citas
 
-![Portada del proyecto](assets/logo_sisdegua.jpeg)
+![Portada del proyecto](assets/sinergia_logo.jpg)
 
 ---
 
 ## Descripción del Proyecto
 
-SISDEGUA es un sistema integral e inteligente automatizado que combina hardware IoT y plataformas de software para monitorear, en tiempo real, los niveles de agua y las condiciones climáticas (intensidad de lluvia). El ecosistema está compuesto por tres pilares fundamentales:
+**SINERGIA APP** es una plataforma de software diseñada para optimizar la gestión de citas y expedientes de pacientes en un entorno clínico. Este repositorio contiene el backend del sistema, construido bajo una arquitectura modular y escalable.
 
-1. **Hardware (IoT):** Dispositivos basados en Arduino equipados con sensores ultrasónicos y de lluvia, además de alertas locales (LEDs y buzzer).
-2. **Aplicación Móvil:** Diseñada para la recepción de alertas push en tiempo real y consulta rápida de datos para los usuarios expuestos al riesgo.
-3. **Aplicación Web:** Plataforma administrativa orientada al monitoreo de estadísticas, consulta de historial y configuración de parámetros personalizados.
+El ecosistema de la API está compuesto por los siguientes módulos fundamentales:
+
+1. **Autenticación y Seguridad (Auth/Users):** Sistema de registro y login de usuarios protegido mediante JSON Web Tokens (JWT) y encriptación de contraseñas. Implementa guardias (`Guards`) para el control de acceso basado en roles.
+2. **Gestión de Citas (Appointments):** Módulo transaccional para agendar citas clínicas. Incluye reglas de negocio estrictas como validación de disponibilidad en tiempo real, protección contra empalme de horarios y políticas de cancelación (mínimo 24 horas de anticipación).
+3. **Persistencia de Datos (Prisma ORM):** Gestión integral de la base de datos relacional (MySQL) asegurando la integridad referencial entre pacientes y citas médicas.
 
 ---
 
 ## Objetivos
 
-### Objetivo
-Desarrollar un sistema automatizado para el monitoreo de niveles de agua mediante sensores IoT, permitiendo alertar en tiempo real sobre riesgos de desbordamiento y almacenar datos históricos para análisis predictivo.
+### Objetivo General
+Desarrollar una API RESTful segura, eficiente y automatizada para el control de pacientes y la programación de citas clínicas, garantizando la integridad de los datos, el manejo correcto de zonas horarias y un control de acceso estructurado.
 
 ---
 
-## Equipo de Trabajo
+## Recursos del Proyecto
+
+Para conocer a detalle las especificaciones y la planeación ágil detrás de SINERGIA APP, puedes consultar los siguientes enlaces:
+
+* 📄 **Documento de Requerimientos:** [Ver Especificaciones en Google Docs](https://docs.google.com/document/d/1-wiI7UCk-STEgVsSuPqDzBsWbg4HSS3D9wVY8jRvm6M/edit?usp=sharing)
+* 📋 **Gestión Ágil y Tareas:** [Ver Tablero en Jira Software](https://alehernandez028h.atlassian.net/?continue=https%3A%2F%2Falehernandez028h.atlassian.net%2Fwelcome%2Fsoftware%3FprojectId%3D10000&atlOrigin=eyJpIjoiMDcwZWIwM2Q4Y2ZlNDQxNWJiYWNmN2VjYmY0NjA4N2IiLCJwIjoiamlyYS1zb2Z0d2FyZSJ9)
+
+---
+
+## Stack Tecnológico
+
+* **Framework:** [NestJS](https://nestjs.com/)
+* **ORM:** [Prisma](https://www.prisma.io/)
+* **Base de Datos:** MySQL
+* **Seguridad:** Passport, JWT, bcrypt
+* **Entorno:** Node.js, TypeScript
+
+---
+
+## Equipo de Trabajo - Grupo 9AX
+
 * Ángel Antelmo Gutiérrez Gadea
 * Genaro Alfredo Silva Espinoza
 * Daniel Olivares Morales
 * Alejandro Hernández Hernández
 
+---
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Licencia 
+## Instalación y Configuración Local
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+1. Clonar el repositorio.
+2. Instalar las dependencias:
+   ```bash
+   npm install
