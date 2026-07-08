@@ -1,67 +1,92 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PrismaService } from 'src/core/databases/prisma.service';
 
 @Injectable()
 export class AppointmentsService {
-    constructor(private prismaService: PrismaService) {}
-    async create(patientId: string, dto: CreateAppointmentDto) {
-        const appointmentDate = new Date(dto.date);
+  constructor(private prismaService: PrismaService) {}
+  async create(patientId: string, dto: CreateAppointmentDto) {
+    const appointmentDate = new Date(dto.date);
 
-        // Verifica disponibilidad de horario (RNF_04)
-        const existingAppointment = await this.prismaService.appointment.findFirst({
-            where: {
-            date: appointmentDate,
-            status: 'activa',
-            },
-        });
+    // Verifica disponibilidad de horario (RNF_04)
+    const existingAppointment = await this.prismaService.appointment.findFirst({
+      where: {
+        date: appointmentDate,
+        status: 'activa',
+      },
+    });
 
-        if (existingAppointment) {
-            throw new BadRequestException('El horario seleccionado ya no está disponible.');
-            }
-
-        //Crear la cita y la relación en la tabla intermedia
-        return this.prismaService.appointment.create({
-            data: {
-            date: appointmentDate,
-            reason: dto.reason,
-            status: 'activa',
-            patients: {
-                create: {
-                patient: {
-                    connect: {id: patientId}
-                }
-                },
-            },
-            },
-        });
+    if (existingAppointment) {
+      throw new BadRequestException(
+        'El horario seleccionado ya no está disponible.',
+      );
     }
 
-    async cancel(patientId: string, appointmentId: string) {
-        const appointment = await this.prismaService.appointment.findUnique({
-            where: { id: appointmentId },
-            include: { patients: true }
-        });
+    //Crear la cita y la relación en la tabla intermedia
+    return this.prismaService.appointment.create({
+      data: {
+        date: appointmentDate,
+        reason: dto.reason,
+        status: 'activa',
+        patients: {
+          create: {
+            patient: {
+              connect: { id: patientId },
+            },
+          },
+        },
+      },
+    });
+  }
 
-        if (!appointment) throw new NotFoundException('Cita no encontrada.');
+  async cancel(patientId: string, appointmentId: string) {
+    const appointment = await this.prismaService.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { patients: true },
+    });
 
-        // Valida que la cita pertenezca al paciente que hace la petición
-        const isOwner = appointment.patients.some(p => p.patientId === patientId);
-        if (!isOwner) throw new ForbiddenException('No tienes permiso para cancelar esta cita.');
+    if (!appointment) throw new NotFoundException('Cita no encontrada.');
 
-        // Valida la regla de las 24 horas
-        const now = new Date();
-        const appointmentDate = new Date(appointment.date);
-        const diffInHours = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    // Valida que la cita pertenezca al paciente que hace la petición
+    const isOwner = appointment.patients.some((p) => p.patientId === patientId);
+    if (!isOwner)
+      throw new ForbiddenException(
+        'No tienes permiso para cancelar esta cita.',
+      );
 
-        if (diffInHours < 24) {
-            throw new BadRequestException('Las citas solo pueden cancelarse con al menos 24 horas de anticipación.');
-        }
+    // Valida la regla de las 24 horas
+    const now = new Date();
+    const appointmentDate = new Date(appointment.date);
+    const diffInHours =
+      (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-        // Actualiza el estado
-        return this.prismaService.appointment.update({
-            where: { id: appointmentId },
-            data: { status: 'cancelada' },
-        });
+    if (diffInHours < 24) {
+      throw new BadRequestException(
+        'Las citas solo pueden cancelarse con al menos 24 horas de anticipación.',
+      );
     }
+
+    // Actualiza el estado
+    return this.prismaService.appointment.update({
+      where: { id: appointmentId },
+      data: { status: 'cancelada' },
+    });
+  }
+  async findAll() {
+    return this.prismaService.appointment.findMany({
+      include: {
+        patients: {
+          include: { patient: true },
+        },
+        doctors: {
+          include: { doctor: true },
+        },
+      },
+    });
+  }
 }

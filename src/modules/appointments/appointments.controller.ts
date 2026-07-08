@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Patch, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Patch,
+  Param,
+  UseGuards,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -13,11 +23,28 @@ export class AppointmentsController {
 
   @Post()
   create(@Req() req, @Body() createAppointmentDto: CreateAppointmentDto) {
-    return this.appointmentsService.create(req.user.userId, createAppointmentDto);
+    return this.appointmentsService.create(
+      req.user.userId,
+      createAppointmentDto,
+    );
   }
 
   @Patch(':id/cancel')
   cancel(@Req() req, @Param('id') appointmentId: string) {
     return this.appointmentsService.cancel(req.user.userId, appointmentId);
+  }
+
+  @Get()
+  @Roles('Administrador')
+  async findAll(@Req() req: any) {
+    const user = req.user;
+
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException(
+        'Solo los administradores pueden visualizar todas las citas.',
+      );
+    }
+
+    return this.appointmentsService.findAll();
   }
 }
