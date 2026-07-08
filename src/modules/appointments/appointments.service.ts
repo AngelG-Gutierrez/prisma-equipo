@@ -8,7 +8,7 @@ export class AppointmentsService {
     async create(patientId: string, dto: CreateAppointmentDto) {
         const appointmentDate = new Date(dto.date);
 
-        // 1. Verificar disponibilidad en tiempo real (RNF_04)
+        // Verifica disponibilidad de horario (RNF_04)
         const existingAppointment = await this.prismaService.appointment.findFirst({
             where: {
             date: appointmentDate,
@@ -20,7 +20,7 @@ export class AppointmentsService {
             throw new BadRequestException('El horario seleccionado ya no está disponible.');
             }
 
-        // 2. Crear la cita y la relación en la tabla intermedia de forma transaccional
+        //Crear la cita y la relación en la tabla intermedia
         return this.prismaService.appointment.create({
             data: {
             date: appointmentDate,
@@ -45,11 +45,11 @@ export class AppointmentsService {
 
         if (!appointment) throw new NotFoundException('Cita no encontrada.');
 
-        // Validar que la cita pertenezca al paciente que hace la petición
+        // Valida que la cita pertenezca al paciente que hace la petición
         const isOwner = appointment.patients.some(p => p.patientId === patientId);
         if (!isOwner) throw new ForbiddenException('No tienes permiso para cancelar esta cita.');
 
-        // Validar la regla de las 24 horas
+        // Valida la regla de las 24 horas
         const now = new Date();
         const appointmentDate = new Date(appointment.date);
         const diffInHours = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -58,7 +58,7 @@ export class AppointmentsService {
             throw new BadRequestException('Las citas solo pueden cancelarse con al menos 24 horas de anticipación.');
         }
 
-        // Actualizar el estado
+        // Actualiza el estado
         return this.prismaService.appointment.update({
             where: { id: appointmentId },
             data: { status: 'cancelada' },

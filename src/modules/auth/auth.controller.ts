@@ -18,6 +18,7 @@ export class AuthController {
   @Public() 
   @UseGuards(LocalAuthGuard) 
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   signIn(@Request() req) {

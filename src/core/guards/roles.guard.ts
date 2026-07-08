@@ -7,7 +7,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    // 1. Obtenemos los roles requeridos para la ruta actual
+    //Obtención de roles requeridos
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -18,19 +18,18 @@ export class RolesGuard implements CanActivate {
       return true; 
     }
     
-    // 2. Extraemos la petición HTTP
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // Este user viene de tu JwtStrategy
+    const user = request.user; // User de JwtStrategy
     
-    // 3. Verificamos que el usuario exista
+    // Verificamos que el usuario exista
     if (!user) {
         throw new ForbiddenException('Usuario no autenticado en el sistema.');
     }
 
-    // 4. Validamos si el rol del usuario actual está dentro del arreglo de roles permitidos
+    // Valida si el rol del usuario actual está dentro del arreglo de roles permitidos
     const hasRole = requiredRoles.includes(user.role);
 
-    // 5. Si no tiene el rol, bloqueamos el acceso inmediatamente
+    // Si no tiene el rol, bloquea acceso
     if (!hasRole) {
       throw new ForbiddenException(
         `Acceso denegado: Este endpoint requiere privilegios de ${requiredRoles.join(' o ')}.`
