@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/core/databases/prisma.service';
-import { User } from '@prisma/client';
-
+import type { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +18,7 @@ export class UsersService {
         email: userData.email,
         image: userData.image,
         password: hash,
-        birthDate: new Date(userData.birthDate), 
+        birthDate: new Date(userData.birthDate),
       },
     });
 
@@ -32,6 +31,14 @@ export class UsersService {
     return this.prismaService.user.findFirst({
       where: {
         username: username,
+      },
+    });
+  }
+
+  async findPatients() {
+    return this.prismaService.user.findMany({
+      where: {
+        role: 'Paciente',
       },
     });
   }
