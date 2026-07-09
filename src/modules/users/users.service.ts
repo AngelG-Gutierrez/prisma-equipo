@@ -18,7 +18,7 @@ export class UsersService {
         email: userData.email,
         image: userData.image,
         password: hash,
-        birthDate: new Date(userData.birthDate), 
+        birthDate: new Date(userData.birthDate),
       },
     });
 
@@ -31,6 +31,14 @@ export class UsersService {
     return this.prismaService.user.findFirst({
       where: {
         username: username,
+      },
+    });
+  }
+
+  async findPatients() {
+    return this.prismaService.user.findMany({
+      where: {
+        role: 'Paciente',
       },
     });
   }
