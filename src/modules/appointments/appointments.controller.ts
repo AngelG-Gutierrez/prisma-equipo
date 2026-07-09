@@ -19,7 +19,7 @@ import { Roles } from 'src/core/decorators/roles.decorator';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('Paciente') // Bloquea el acceso a Administradores o usuarios sin sesión
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Post()
   create(@Req() req, @Body() createAppointmentDto: CreateAppointmentDto) {
@@ -45,5 +45,10 @@ export class AppointmentsController {
     }
 
     return this.appointmentsService.findAll();
+  }
+
+  @Get('upcoming')
+  async findUpcoming(@Req() req) {
+    return this.appointmentsService.findUpcomingByPatient(req.user.userId);
   }
 }

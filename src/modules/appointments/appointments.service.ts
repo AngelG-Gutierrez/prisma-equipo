@@ -9,7 +9,7 @@ import { PrismaService } from 'src/core/databases/prisma.service';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
   async create(patientId: string, dto: CreateAppointmentDto) {
     const appointmentDate = new Date(dto.date);
 
@@ -80,5 +80,19 @@ export class AppointmentsService {
 
   async findAll() {
     return this.prismaService.appointment.findMany();
+  }
+
+  async findUpcomingByPatient(patientId: string) {
+    const now = new Date();
+    return this.prismaService.appointment.findMany({
+      where: {
+        date: { gte: now },
+        status: 'activa',
+        patients: {
+          some: { patientId },
+        },
+      },
+      orderBy: { date: 'asc' },
+    });
   }
 }
