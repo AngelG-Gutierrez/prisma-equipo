@@ -17,7 +17,7 @@ import { Roles } from 'src/core/decorators/roles.decorator';
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Post()
   @Roles('Paciente')
@@ -39,5 +39,10 @@ export class AppointmentsController {
   async findAll(@Req() req: any) {
     const user = req.user;
     return this.appointmentsService.findAll();
+  }
+
+  @Get('upcoming')
+  async findUpcoming(@Req() req) {
+    return this.appointmentsService.findUpcomingByPatient(req.user.userId);
   }
 }

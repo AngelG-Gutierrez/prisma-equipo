@@ -19,7 +19,6 @@ export class AppointmentsService {
             'No se pueden agendar citas en fechas o en horarios pasados.',
             );
         }   
-
     // Verifica disponibilidad de horario (RNF_04)
     const existingAppointment = await this.prismaService.appointment.findFirst({
       where: {
@@ -87,5 +86,19 @@ export class AppointmentsService {
 
   async findAll() {
     return this.prismaService.appointment.findMany();
+  }
+
+  async findUpcomingByPatient(patientId: string) {
+    const now = new Date();
+    return this.prismaService.appointment.findMany({
+      where: {
+        date: { gte: now },
+        status: 'activa',
+        patients: {
+          some: { patientId },
+        },
+      },
+      orderBy: { date: 'asc' },
+    });
   }
 }
