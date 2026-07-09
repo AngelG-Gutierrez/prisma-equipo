@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { PrescriptionsModule } from './modules/prescriptions/prescriptions.module';
+import { MedicalRecordModule } from './modules/medical-record/medical-record.module';
 
 @Module({
   imports: [
@@ -12,7 +14,9 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
       isGlobal: true,
     }),
     AuthModule,
-    AppointmentsModule
+    PrescriptionsModule,
+    AppointmentsModule,
+    MedicalRecordModule
   ],
   controllers: [AppController],
   providers: [AppService,{
