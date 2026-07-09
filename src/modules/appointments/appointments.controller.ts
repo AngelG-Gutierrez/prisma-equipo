@@ -7,7 +7,6 @@ import {
   Param,
   UseGuards,
   Req,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -17,11 +16,11 @@ import { Roles } from 'src/core/decorators/roles.decorator';
 
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('Paciente') // Bloquea el acceso a Administradores o usuarios sin sesión
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Post()
+  @Roles('Paciente')
   create(@Req() req, @Body() createAppointmentDto: CreateAppointmentDto) {
     return this.appointmentsService.create(
       req.user.userId,
@@ -30,20 +29,15 @@ export class AppointmentsController {
   }
 
   @Patch(':id/cancel')
+  @Roles('Paciente')
   cancel(@Req() req, @Param('id') appointmentId: string) {
     return this.appointmentsService.cancel(req.user.userId, appointmentId);
   }
 
   @Get()
+  @Roles('Administrador')
   async findAll(@Req() req: any) {
     const user = req.user;
-
-    if (user.role !== 'Administrador') {
-      throw new UnauthorizedException(
-        'Solo los administradores pueden visualizar todas las citas.',
-      );
-    }
-
     return this.appointmentsService.findAll();
   }
 
