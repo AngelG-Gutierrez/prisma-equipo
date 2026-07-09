@@ -79,7 +79,7 @@ model MedicalRecord {
   updatedAt    DateTime @updatedAt
 }
 
-// SIN-20 & RF_12: Crear y asignar prescripciones (Planes de Ejercicio)
+// SIN-20 & RF_12: Crear y asignar prescripciones (Planes de Ejercicio) -Ale 
 model Prescription {
   id           String   @id @default(cuid())
   patientId    String
