@@ -7,6 +7,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { PrescriptionsModule } from './modules/prescriptions/prescriptions.module';
 import { MedicalRecordModule } from './modules/medical-record/medical-record.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { MedicalRecordModule } from './modules/medical-record/medical-record.mod
     AuthModule,
     PrescriptionsModule,
     AppointmentsModule,
-    MedicalRecordModule
+    MedicalRecordModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService,{
