@@ -7,17 +7,23 @@ import {
   Param,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/decorators/roles.decorator';
+import { AppointmentsCronService } from './cron/appointments-cron.service';
 
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) { }
+  constructor(
+    private readonly appointmentsService: AppointmentsService,
+    private readonly appointmentsCronService: AppointmentsCronService,
+  ) { }
 
   @Post()
   @Roles('Paciente')
@@ -44,5 +50,20 @@ export class AppointmentsController {
   @Get('upcoming')
   async findUpcoming(@Req() req) {
     return this.appointmentsService.findUpcomingByPatient(req.user.userId);
+  }
+
+  // =========================================================
+  // ENDPOINT MANUAL DE PRUEBA PARA EL CRON JOB (Notificaciones)
+  // =========================================================
+  @Post('trigger-reminders')
+  @Roles('Administrador') // Restringido para que solo un admin pueda forzar el escaneo
+  @HttpCode(HttpStatus.OK)
+  async triggerCronManually() {
+    this.appointmentsCronService.handleAppointmentReminders();
+    
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Escaneo de recordatorios iniciado en segundo plano. Revisa la consola de NestJS.',
+    };
   }
 }
