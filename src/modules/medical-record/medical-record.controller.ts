@@ -12,6 +12,7 @@ export class MedicalRecordsController {
   @Post()
   @UseGuards(JwtAuthGuard) // El guard de tu equipo valida que esté logueado
   async create(@Body() createDto: CreateMedicalRecordDto, @Req() req: any) {
+    
     // el JwtAuthGuard guarda al usuario logueado en req.user
     const user = req.user; 
 
