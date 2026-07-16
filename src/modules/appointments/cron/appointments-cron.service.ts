@@ -54,13 +54,12 @@ export class AppointmentsCronService {
         if (!patientData || !patientData['email']) continue;
 
         const formattedTime = appointment.date.toLocaleTimeString('es-MX', {
-          timeZone: 'UTC', // Esto evita que aplique el desfase de -6 horas de México
+          timeZone: 'UTC',
           hour: '2-digit',
           minute: '2-digit',
           hour12: true,
         });
 
-        // 2. Si también quieres incluir el día de manera legible y correcta en UTC:
         const formattedDate = appointment.date.toLocaleDateString('es-MX', {
           timeZone: 'UTC',
         });
