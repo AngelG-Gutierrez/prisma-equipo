@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { PrescriptionsService } from './prescriptions.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
-import { RolesGuard } from 'src/core/guards/roles.guard';       // ajusta ruta real
-import { Roles } from 'src/core/decorators/roles.decorator';    // ajusta ruta real
+import { RolesGuard } from 'src/core/guards/roles.guard';      
+import { Roles } from 'src/core/decorators/roles.decorator';    
 
 @Controller('prescriptions')
-@UseGuards(RolesGuard) // se aplican a TODO el controller
+@UseGuards(RolesGuard) 
 export class PrescriptionsController {
   constructor(private readonly prescriptionsService: PrescriptionsService) {}
 
