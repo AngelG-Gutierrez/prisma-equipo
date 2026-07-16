@@ -9,16 +9,10 @@ import { PrismaService } from 'src/core/databases/prisma.service';
 
 @Injectable()
 export class AppointmentsService {
-    constructor(private prismaService: PrismaService) {}
-    async create(patientId: string, dto: CreateAppointmentDto) {
-        const appointmentDate = new Date(dto.date);
-        const now = new Date();
+  constructor(private prismaService: PrismaService) { }
+  async create(patientId: string, dto: CreateAppointmentDto) {
+    const appointmentDate = new Date(dto.date);
 
-        if (appointmentDate < now) {
-            throw new BadRequestException(
-            'No se pueden agendar citas en fechas o en horarios pasados.',
-            );
-        }   
     // Verifica disponibilidad de horario (RNF_04)
     const existingAppointment = await this.prismaService.appointment.findFirst({
       where: {
