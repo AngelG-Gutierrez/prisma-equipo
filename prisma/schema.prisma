@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  moduleFormat    = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String    
+  username  String    @unique
+  email     String    @unique
+  image     String?
+  password  String
+  role      String    @default("Paciente")
+  birthDate DateTime 
+  active    Boolean   @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  // Relaciones inversas
+  appointments PatientAppointment[] // Citas como paciente
+  doctorAppointments DoctorAppointment[] // Citas asignadas si es Admin/Fisio
+  medicalRecord MedicalRecord?     // Expediente clínico (uno a uno)
+  prescriptions Prescription[]     // Planes de ejercicio asignados
+}
+
+// SIN-14, SIN-15, SIN-16 & RF_05, RF_10: Gestión de Citas
+model Appointment {
+  id          String   @id @default(cuid())
+  date        DateTime // Fecha y Hora combinadas para el bloqueo transaccional
+  status      String   @default("activa") // activa, cancelada, finalizada
+  reason      String?  // Motivo de la consulta
+
+  reminderSent Boolean  @default(false)
+  
+  // Relaciones
+  patients    PatientAppointment[]
+  doctors     DoctorAppointment[]
+
+  createdAt   DateTime @default(now())
+}
+
+// Tablas intermedias
+model PatientAppointment {
+  id            String      @id @default(cuid())
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  patientId     String
+  patient       User        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model DoctorAppointment {
+  id            String      @id @default(cuid())
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        User        @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+
+// SIN-13 & RF_13: Expediente Clínico (Relación 1 a 1 con Paciente)
+model MedicalRecord {
+  id           String   @id @default(cuid())
+  patientId    String   @unique
+  patient      User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  diagnosis    String   @db.Text // diagnóstico
+  history      String   @db.Text // antecedentes
+  evolution    String   @db.Text // observaciones / evolución
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// SIN-20 & RF_12: Crear y asignar prescripciones (Planes de Ejercicio) -Ale 
+model Prescription {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  exerciseName String   // Nombre del ejercicio
+  description  String   @db.Text // Descripción
+  frequency    String   // Frecuencia / repeticiones
+  mediaUrl     String?  // Multimedia (integración de API externa)
+
+  createdAt    DateTime @default(now())
+}
