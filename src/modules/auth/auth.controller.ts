@@ -17,8 +17,6 @@ export class AuthController {
 
   @Public() 
   @UseGuards(LocalAuthGuard) 
-
-  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   signIn(@Request() req) {
@@ -39,4 +37,10 @@ export class AuthController {
         datosDecodificados: req.user,
       };
     }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user; 
+  }
 }

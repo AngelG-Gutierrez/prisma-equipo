@@ -5,16 +5,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { PrismaService } from 'src/core/databases/prisma.service';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private prismaService: PrismaService) { }
+  private readonly prisma = new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+  });
+
+  constructor() { }
+
   async create(patientId: string, dto: CreateAppointmentDto) {
     const appointmentDate = new Date(dto.date);
 
     // Verifica disponibilidad de horario (RNF_04)
-    const existingAppointment = await this.prismaService.appointment.findFirst({
+    const existingAppointment = await this.prisma.appointment.findFirst({
       where: {
         date: appointmentDate,
         status: 'activa',
@@ -28,7 +33,7 @@ export class AppointmentsService {
     }
 
     //Crear la cita y la relación en la tabla intermedia
-    return this.prismaService.appointment.create({
+    return this.prisma.appointment.create({
       data: {
         date: appointmentDate,
         reason: dto.reason,
@@ -45,7 +50,7 @@ export class AppointmentsService {
   }
 
   async cancel(patientId: string, appointmentId: string) {
-    const appointment = await this.prismaService.appointment.findUnique({
+    const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { patients: true },
     });
@@ -72,19 +77,19 @@ export class AppointmentsService {
     }
 
     // Actualiza el estado
-    return this.prismaService.appointment.update({
+    return this.prisma.appointment.update({
       where: { id: appointmentId },
       data: { status: 'cancelada' },
     });
   }
 
   async findAll() {
-    return this.prismaService.appointment.findMany();
+    return this.prisma.appointment.findMany();
   }
 
   async findUpcomingByPatient(patientId: string) {
     const now = new Date();
-    return this.prismaService.appointment.findMany({
+    return this.prisma.appointment.findMany({
       where: {
         date: { gte: now },
         status: 'activa',
