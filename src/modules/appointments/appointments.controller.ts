@@ -16,7 +16,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/decorators/roles.decorator';
 import { AppointmentsCronService } from './cron/appointments-cron.service';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
+import { Appointment } from './appointment';
 
+@ApiBearerAuth()
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AppointmentsController {
@@ -25,9 +28,11 @@ export class AppointmentsController {
     private readonly appointmentsCronService: AppointmentsCronService,
   ) { }
 
+  @ApiOperation({ summary: 'Crear una cita' })
+  //@ApiCreatedResponse({type: Appointment})
   @Post()
   @Roles('Paciente')
-  create(@Req() req, @Body() createAppointmentDto: CreateAppointmentDto) {
+  create(@Req() req, @Body() createAppointmentDto: CreateAppointmentDto)/* : Promise<Appointment>*/ {
     return this.appointmentsService.create(
       req.user.userId,
       createAppointmentDto,
