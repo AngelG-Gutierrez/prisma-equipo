@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('Auth System (E2E - Ejercicio 2)', () => {
+describe('MedicalRecord System (E2E)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -19,24 +19,21 @@ describe('Auth System (E2E - Ejercicio 2)', () => {
     await app.close();
   });
 
-  it('1. Debe rechazar el acceso a pacientes sin token JWT (401 Unauthorized)', () => {
+  it('1 Debe rechazar la creación de expedientes a peticiones sin token (401 Unauthorized)', () => {
     return request(app.getHttpServer())
-      .get('/users/patients')
-      .expect(401);
-  });
-
-  it('2. Debe rechazar el acceso a la ruta de prueba de seguridad sin token (401 Unauthorized)', () => {
-    return request(app.getHttpServer())
-      .get('/auth/test-seguridad')
-      .expect(401);
-  });
-
-  it('3. Debe responder 401 si se intentan enviar credenciales inválidas en login', () => {
-    return request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/medical-records')
       .send({
-        email: 'invalido@sinergia.com',
-        password: 'password_incorrecto',
+        patientId: 'p-100',
+        diagnosis: 'Sin autenticación',
+      })
+      .expect(401);
+  });
+
+  it('2 Debe rechazar la modificación de expedientes a peticiones sin token (401 Unauthorized)', () => {
+    return request(app.getHttpServer())
+      .patch('/medical-records/mr-100')
+      .send({
+        diagnosis: 'Sin autenticación',
       })
       .expect(401);
   });

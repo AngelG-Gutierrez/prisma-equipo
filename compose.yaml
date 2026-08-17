@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: authNestJS
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot && mysql -u root -proot -e 'USE authNestJS;'"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+
+  app:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: authNestJS
+      DATABASE_URL: "mysql://root:root@db:3306/authNestJS"
+      JWT_SECRET: "suszWobXGGAsk0PLh7eKVKB8QLccWRNr"
+      JWT_EXP: "24h"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
