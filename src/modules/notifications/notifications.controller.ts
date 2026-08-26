@@ -1,21 +1,29 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
+import { SendNotificationDto } from './dto/send-notification.dto';
+import { Public } from '../../core/decorators/public.decorator';
 
+@ApiTags('Notificaciones')
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Get('test')
-  async testNotification() {
-    // Endpoint para probar el envío de notificaciones
-    await this.notificationsService.sendEmail(
-      'genaroutv@gmail.com',
-      'Prueba de Integración',
-      'Este es un mensaje de prueba desde el controlador de NestJS.',
+  @Public()
+  @Post('test')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Probar el envío de notificaciones por correo' })
+  @ApiOkResponse({ description: 'La solicitud de correo fue procesada.' })
+  async testNotification(@Body() notificationData: SendNotificationDto) {
+    // datos que llegan desde Swagger
+    const isSuccess = await this.notificationsService.sendEmail(
+      notificationData.to,
+      notificationData.subject,
+      notificationData.body || 'Sin mensaje adicional',
     );
 
     return {
-      success: true,
+      success: isSuccess,
       message:
         'La solicitud fue recibida, revisa los logs en tu terminal y tu bandeja de entrada.',
     };

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -22,7 +31,8 @@ export class AuthController {
   @ApiCreatedResponse({ description: 'El usuario ha sido registrado exitosamente.' })
   @Public() 
   @Post('signup')
-  signUp(@Body() createUserDto: CreateUserDto) {    
+  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+  signUp(@Body() createUserDto: CreateUserDto) {
     return this.authService.register(createUserDto);
   }
 
@@ -43,7 +53,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard) 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  signIn(@Request() req) {
+  @ApiOperation({ summary: 'Autenticación de usuario' })
+  @ApiOkResponse({ type: LoginResponse })
+  signIn(@Request() req, @Body() credential: LoginDto) {
     return this.authService.login(req.user);
   }
 
@@ -61,6 +73,12 @@ export class AuthController {
   @ApiOkResponse({ description: 'Retorna un mensaje de confirmación y los datos decodificados del token.' })
   @UseGuards(JwtAuthGuard)
   @Get('test-seguridad')
+  probarRutaProtegida(@Request() req) {
+    return {
+      mensaje: '¡Éxito! Lograste entrar al área restringida de SINERGIA APP.',
+      datosDecodificados: req.user,
+    };
+  }
   probarRutaProtegida(@Request() req) {
     return {
       mensaje: '¡Éxito! Lograste entrar al área restringida de SINERGIA APP.',
