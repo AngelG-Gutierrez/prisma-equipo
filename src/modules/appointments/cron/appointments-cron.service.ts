@@ -12,7 +12,13 @@ export class AppointmentsCronService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  // Se ejecuta automáticamente cada 30 minutos
+  /**
+   * Tarea programada que se ejecuta automáticamente cada 30 minutos.
+   * Escanea la base de datos en busca de citas activas proyectadas en las próximas 24 horas,
+   * envía un correo electrónico de recordatorio al paciente y actualiza la bandera `reminderSent`.
+   * 
+   * @returns {Promise<void>} No retorna ningún valor, el proceso corre en segundo plano.
+   */
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleAppointmentReminders() {
     this.logger.log('Iniciando escaneo de agenda para recordatorios de 24h...');
@@ -66,6 +72,7 @@ export class AppointmentsCronService {
 
         const subject = 'Sinergia App: Recordatorio de Cita Médica';
         const message = `Hola,\n\nTe recordamos que tienes una cita de fisioterapia el día ${formattedDate} a las ${formattedTime}.\n\nPor favor, recuerda llegar 10 minutos antes.\n\nSaludos,\nClínica Sinergia.`;
+        
         // Se envía correo
         const success = await this.notificationsService.sendEmail(
           patientData['email'],
