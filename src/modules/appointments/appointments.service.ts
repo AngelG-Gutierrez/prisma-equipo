@@ -6,19 +6,23 @@ import {
 } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PrismaService } from 'src/core/databases/prisma.service';
+import { Appointment } from './appointment';
 
 @Injectable()
 export class AppointmentsService {
-    constructor(private prismaService: PrismaService) {}
-    async create(patientId: string, dto: CreateAppointmentDto) {
-        const appointmentDate = new Date(dto.date);
-        const now = new Date();
+  constructor(private prismaService: PrismaService) { }
 
-        if (appointmentDate < now) {
-            throw new BadRequestException(
-            'No se pueden agendar citas en fechas o en horarios pasados.',
-            );
-        }   
+  /**
+   * Crea una nueva cita para un paciente validando la disponibilidad del horario (RNF_04).
+   * 
+   * @param {string} patientId - El identificador único del paciente que solicita la cita.
+   * @param {CreateAppointmentDto} dto - Objeto con los datos necesarios para crear la cita.
+   * @throws {BadRequestException} Si el horario seleccionado ya tiene una cita activa.
+   * @returns {Promise<Appointment>} El registro de la cita recién creada junto con su relación.
+   */
+  async create(patientId: string, dto: CreateAppointmentDto) {
+    const appointmentDate = new Date(dto.date);
+
     // Verifica disponibilidad de horario (RNF_04)
     const existingAppointment = await this.prismaService.appointment.findFirst({
       where: {
@@ -33,7 +37,7 @@ export class AppointmentsService {
       );
     }
 
-    //Crear la cita y la relación en la tabla intermedia
+    // Crear la cita y la relación en la tabla intermedia
     return this.prismaService.appointment.create({
       data: {
         date: appointmentDate,
@@ -50,6 +54,17 @@ export class AppointmentsService {
     });
   }
 
+  /**
+   * Cancela una cita existente verificando que pertenezca al paciente solicitante 
+   * y que se realice con al menos 24 horas de anticipación.
+   * 
+   * @param {string} patientId - El identificador del paciente que intenta cancelar.
+   * @param {string} appointmentId - El identificador de la cita a cancelar.
+   * @throws {NotFoundException} Si la cita no existe en la base de datos.
+   * @throws {ForbiddenException} Si el paciente intenta cancelar una cita que no le pertenece.
+   * @throws {BadRequestException} Si se intenta cancelar con menos de 24 horas de anticipación.
+   * @returns {Promise<Appointment>} El registro de la cita actualizada con estado "cancelada".
+   */
   async cancel(patientId: string, appointmentId: string) {
     const appointment = await this.prismaService.appointment.findUnique({
       where: { id: appointmentId },
@@ -84,10 +99,21 @@ export class AppointmentsService {
     });
   }
 
+  /**
+   * Obtiene un listado general de todas las citas registradas en el sistema.
+   * 
+   * @returns {Promise<Appointment[]>} Un arreglo con todas las citas.
+   */
   async findAll() {
     return this.prismaService.appointment.findMany();
   }
 
+  /**
+   * Obtiene las próximas citas activas de un paciente en específico, ordenadas cronológicamente.
+   * 
+   * @param {string} patientId - El identificador del paciente.
+   * @returns {Promise<Appointment[]>} Un arreglo con las futuras citas del paciente.
+   */
   async findUpcomingByPatient(patientId: string) {
     const now = new Date();
     return this.prismaService.appointment.findMany({

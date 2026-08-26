@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, UseGuards, Req, } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PrescriptionsService } from './prescriptions.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
+<<<<<<< HEAD
 import { PrescriptionEntity } from './entities/prescription.entity';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/decorators/roles.decorator';
@@ -10,6 +11,15 @@ import { Roles } from 'src/core/decorators/roles.decorator';
 @ApiBearerAuth()
 @Controller('prescriptions')
 @UseGuards(RolesGuard)
+=======
+import { RolesGuard } from 'src/core/guards/roles.guard';      
+import { Roles } from 'src/core/decorators/roles.decorator';    
+import { ApiBearerAuth } from '@nestjs/swagger';
+
+@ApiBearerAuth()
+@Controller('prescriptions')
+@UseGuards(RolesGuard) 
+>>>>>>> ccc5456b70603c683db94415f80c80490c9c99e2
 export class PrescriptionsController {
   constructor(
     private readonly prescriptionsService: PrescriptionsService,

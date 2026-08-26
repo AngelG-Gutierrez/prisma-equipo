@@ -38,7 +38,9 @@ model Appointment {
   id          String   @id @default(cuid())
   date        DateTime // Fecha y Hora combinadas para el bloqueo transaccional
   status      String   @default("activa") // activa, cancelada, finalizada
-  reason      String?  // Motivo de la consulta
+  reason      String  // Motivo de la consulta
+
+  reminderSent Boolean  @default(false)
   
   // Relaciones
   patients    PatientAppointment[]
