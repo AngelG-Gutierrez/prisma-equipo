@@ -3,6 +3,8 @@ import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { describe } from 'node:test';
 
 @Controller('medical-records')
 export class MedicalRecordsController {
@@ -24,6 +26,17 @@ export class MedicalRecordsController {
   }
 
   // Ticket 2: edición de expediente
+  @ApiOperation({summary: "Actualización de expediente"})
+  @ApiParam({
+    type: "string",
+    name: "id",
+    description: "Id de historial medico"
+  })
+  @ApiBody({
+    description: "Datos del historial medico",
+    type: UpdateMedicalRecordDto
+  })
+  @ApiResponse({ status: '2XX', type: UpdateMedicalRecordDto})
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(

@@ -4,19 +4,21 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Public } from '../../core/decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags("Autenticación")
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
-  @Public() 
+  @Public()
   @Post('signup')
-  signUp(@Body() createUserDto: CreateUserDto) {    
+  signUp(@Body() createUserDto: CreateUserDto) {
     return this.authService.register(createUserDto);
   }
 
-  @Public() 
-  @UseGuards(LocalAuthGuard) 
+  @Public()
+  @UseGuards(LocalAuthGuard)
 
   @Public()
   @Post('login')
@@ -33,10 +35,10 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('test-seguridad')
-    probarRutaProtegida(@Request() req) {
-      return {
-        mensaje: '¡Éxito! Lograste entrar al área restringida de SINERGIA APP.',
-        datosDecodificados: req.user,
-      };
-    }
+  probarRutaProtegida(@Request() req) {
+    return {
+      mensaje: '¡Éxito! Lograste entrar al área restringida de SINERGIA APP.',
+      datosDecodificados: req.user,
+    };
+  }
 }
