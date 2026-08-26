@@ -15,12 +15,6 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/decorators/roles.decorator';
-<<<<<<< HEAD
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
-@ApiBearerAuth()
-@ApiTags("Ejercicios")
-=======
 import { AppointmentsCronService } from './cron/appointments-cron.service';
 import { 
   ApiBearerAuth, 
@@ -34,7 +28,6 @@ import { Appointment } from './appointment';
 
 @ApiTags('Appointments')
 @ApiBearerAuth()
->>>>>>> ccc5456b70603c683db94415f80c80490c9c99e2
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AppointmentsController {
@@ -43,16 +36,11 @@ export class AppointmentsController {
     private readonly appointmentsCronService: AppointmentsCronService,
   ) { }
 
-<<<<<<< HEAD
-  @ApiOperation({summary: 'Agregar cita'})
-  @ApiCreatedResponse({ type: CreateAppointmentDto})
-=======
   @ApiOperation({ summary: 'Crear una nueva cita' })
   @ApiCreatedResponse({ 
     type: Appointment, 
     description: 'La cita ha sido creada exitosamente.' 
   })
->>>>>>> ccc5456b70603c683db94415f80c80490c9c99e2
   @Post()
   @Roles('Paciente')
   create(@Req() req, @Body() createAppointmentDto: CreateAppointmentDto): Promise<Appointment> {
@@ -83,16 +71,11 @@ export class AppointmentsController {
     return this.appointmentsService.cancel(req.user.userId, appointmentId);
   }
 
-<<<<<<< HEAD
-  @ApiOperation({ summary: "Lista de citas"})
-  @ApiResponse({ status: "2XX", type: CreateAppointmentDto, isArray: true})
-=======
   @ApiOperation({ summary: 'Obtener todas las citas (Solo Administrador)' })
   @ApiOkResponse({ 
     type: [Appointment],
     description: 'Retorna la lista de todas las citas del sistema.' 
   })
->>>>>>> ccc5456b70603c683db94415f80c80490c9c99e2
   @Get()
   @Roles('Administrador')
   async findAll(@Req() req: any): Promise<Appointment[]> {

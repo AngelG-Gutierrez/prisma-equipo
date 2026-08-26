@@ -3,12 +3,8 @@ import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-<<<<<<< HEAD
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { describe } from 'node:test';
-=======
 import { ApiBearerAuth } from '@nestjs/swagger';
->>>>>>> ccc5456b70603c683db94415f80c80490c9c99e2
 
 @ApiBearerAuth()
 @Controller('medical-records')
