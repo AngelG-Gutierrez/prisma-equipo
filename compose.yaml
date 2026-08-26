@@ -2,15 +2,16 @@ services:
   db:
     image: mysql:8.0
     restart: always
+    shm_size: 128mb
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: authNestJS
-    ports:
-      - "3306:3306"
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
     volumes:
-      - db-data:/var/lib/mysql
+      - './mysql_data:/var/lib/mysql'
+    ports:
+      - "3000:3006" # Mantiene mapeo del puerto DB
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot && mysql -u root -proot -e 'USE authNestJS;'"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${DB_PASSWORD} || exit 1"]
       interval: 3s
       timeout: 5s
       retries: 15
@@ -19,21 +20,18 @@ services:
   app:
     build:
       context: .
-    ports:
-      - "3000:3000"
+    env_file:
+      - .env
     environment:
-      PORT: 3000
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: authNestJS
-      DATABASE_URL: "mysql://root:root@db:3306/authNestJS"
-      JWT_SECRET: "suszWobXGGAsk0PLh7eKVKB8QLccWRNr"
-      JWT_EXP: "24h"
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: ${JWT_EXP}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "3000:3000"
 
 volumes:
   db-data:

@@ -1,16 +1,16 @@
-FROM node:22-alpine
+FROM node:24.16.0
 
 WORKDIR /app
 
 COPY package*.json ./
+COPY prisma ./prisma/
+
 RUN npm install
 
 COPY . .
 
-# Generar Prisma Client
 RUN npx prisma generate
 
-# Compilar proyecto NestJS
 RUN npm run build
 
 EXPOSE 3000
