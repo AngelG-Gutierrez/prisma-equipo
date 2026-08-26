@@ -7,8 +7,14 @@ export class CreateAppointmentDto {
   @IsDateString({}, { message: 'El formato de la fecha no es válido.' })
   date: string; 
 
-  @ApiProperty({required: true, description: 'Motivo de la cita'})
+  @ApiProperty({ required: true, description: "Motivo de la cita"})
   @IsOptional()
   @IsString({ message: 'El motivo debe ser una cadena de texto.' })
   reason: string;
+
+  /*@ApiProperty({
+      enum: ProjectStatus,
+      enumName: "status",
+      description: "Estatus del proyecto"
+    }) */
 }
