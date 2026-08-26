@@ -1,11 +1,13 @@
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBody, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
+
+import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Public } from '../../core/decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-
-import { ApiTags, ApiOperation, ApiBody, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponse } from './entities/login-response';
 
 @ApiTags('Auth') // Agrupa estos endpoints en la sección "Auth" de Swagger
 @Controller('auth')
@@ -35,8 +37,6 @@ export class AuthController {
   @ApiOkResponse({ description: 'Inicio de sesión exitoso. Retorna el token de acceso.' })
   @Public()
   @UseGuards(LocalAuthGuard)
-
-  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   signIn(@Request() req) {
