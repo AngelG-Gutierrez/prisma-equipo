@@ -5,7 +5,7 @@ export class LoginDto {
   @ApiProperty({
     required: true,
     description: 'Nombre de usuario registrado',
-    example: 'Genaro69',
+    example: 'Alee717',
   })
   @IsString()
   @IsNotEmpty()
@@ -13,7 +13,7 @@ export class LoginDto {
 
   @ApiProperty({
     required: true,
-    description: 'Contraseña de acceso',
+    description: 'Contraseña',
   })
   @IsString()
   @IsNotEmpty()

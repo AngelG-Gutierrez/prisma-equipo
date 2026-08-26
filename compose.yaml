@@ -9,19 +9,29 @@ services:
     volumes:
       - './mysql_data:/var/lib/mysql'
     ports:
-      - "3306:3306"
-      
+      - "3000:3006" # Mantiene mapeo del puerto DB
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${DB_PASSWORD} || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+
   app:
     build:
       context: .
     env_file:
-      - .env 
+      - .env
     environment:
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXP: ${JWT_EXP}
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "3000:3000"
+
+volumes:
+  db-data:

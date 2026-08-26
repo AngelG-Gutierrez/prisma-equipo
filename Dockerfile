@@ -15,4 +15,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-CMD npx prisma migrate deploy && npm run start:prod
+CMD ["sh", "-c", "npx prisma migrate deploy && if [ -f dist/src/main.js ]; then node dist/src/main.js; else node dist/main.js; fi"]
