@@ -30,6 +30,17 @@ export class MedicalRecordsController {
   }
 
   // Ticket 2: edición de expediente
+  @ApiOperation({summary: "Actualización de expediente"})
+  @ApiParam({
+    type: "string",
+    name: "id",
+    description: "Id de historial medico"
+  })
+  @ApiBody({
+    description: "Datos del historial medico",
+    type: UpdateMedicalRecordDto
+  })
+  @ApiResponse({ status: '2XX', type: UpdateMedicalRecordDto})
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Edición de expediente clínico' }) // Descripción corta[cite: 1]
