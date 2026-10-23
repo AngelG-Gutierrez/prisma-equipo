@@ -3,7 +3,9 @@ import { PrescriptionsService } from './prescriptions.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { RolesGuard } from 'src/core/guards/roles.guard';      
 import { Roles } from 'src/core/decorators/roles.decorator';    
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('prescriptions')
 @UseGuards(RolesGuard) 
 export class PrescriptionsController {

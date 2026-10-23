@@ -9,13 +9,12 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model User {
   id        String    @id @default(cuid())
   name      String    
-  username  String    @unique
   email     String    @unique
   image     String?
   password  String
@@ -38,7 +37,7 @@ model Appointment {
   id          String   @id @default(cuid())
   date        DateTime // Fecha y Hora combinadas para el bloqueo transaccional
   status      String   @default("activa") // activa, cancelada, finalizada
-  reason      String?  // Motivo de la consulta
+  reason      String  // Motivo de la consulta
 
   reminderSent Boolean  @default(false)
   

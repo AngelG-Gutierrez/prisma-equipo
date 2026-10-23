@@ -7,6 +7,13 @@ export class NotificationsService {
 
   constructor(private readonly mailerService: MailerService) {}
 
+  /**
+   * Procesa de forma asíncrona el envío de correos electrónicos.
+   * @param {string} to - Dirección de correo electrónico del destinatario.
+   * @param {string} subject - Asunto del correo.
+   * @param {string} message - Cuerpo del mensaje en texto plano.
+   * @returns {Promise<boolean>} Retorna true si el correo se entregó con éxito, o false si falló.
+   */
   async sendEmail(
     to: string,
     subject: string,

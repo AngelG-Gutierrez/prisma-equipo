@@ -20,12 +20,15 @@ import { ScheduleModule } from '@nestjs/schedule';
     PrescriptionsModule,
     AppointmentsModule,
     MedicalRecordModule,
-    NotificationsModule
+    NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService,{
-    provide: 'APP_GUARD',
-    useClass: JwtAuthGuard,
-  }],
+  providers: [
+    AppService,
+    {
+      provide: 'APP_GUARD',
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
