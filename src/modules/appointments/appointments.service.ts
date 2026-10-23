@@ -109,6 +109,21 @@ export class AppointmentsService {
   }
 
   /**
+   * Obtiene todo el historial de citas de un paciente (activas, canceladas y finalizadas)
+   * para alimentar las pestañas de la app móvil.
+   */
+  async findAllByPatient(patientId: string) {
+    return this.prismaService.appointment.findMany({
+      where: {
+        patients: {
+          some: { patientId },
+        },
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
+  /**
    * Obtiene las próximas citas activas de un paciente en específico, ordenadas cronológicamente.
    * 
    * @param {string} patientId - El identificador del paciente.
