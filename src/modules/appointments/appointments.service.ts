@@ -133,8 +133,6 @@ export class AppointmentsService {
     const now = new Date();
     return this.prismaService.appointment.findMany({
       where: {
-        date: { gte: now },
-        status: 'activa',
         patients: {
           some: { patientId },
         },
