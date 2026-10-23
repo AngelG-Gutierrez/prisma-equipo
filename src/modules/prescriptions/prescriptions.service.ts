@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/core/databases/prisma.service';
+import { PrismaService } from '../../core/databases/prisma.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { NotificationsService } from '../notifications/notifications.service'; 
 
