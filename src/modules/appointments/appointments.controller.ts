@@ -77,7 +77,7 @@ export class AppointmentsController {
     description: 'Retorna la lista de todas las citas del sistema.' 
   })
   @Get()
-  @Roles('Administrador')
+  @Roles('Administrador', 'Paciente')
   async findAll(@Req() req: any): Promise<Appointment[]> {
     const user = req.user;
     return this.appointmentsService.findAll();

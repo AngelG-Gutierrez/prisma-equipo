@@ -13,11 +13,37 @@ export class AppointmentsCronService {
   ) {}
 
   /**
+   * Tarea programada que se ejecuta automáticamente cada minuto.
+   * Busca citas con estatus 'activa' cuya fecha y hora ya hayan pasado
+   * y las cambia automáticamente a estatus 'finalizada'.
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleExpiredAppointments() {
+    const now = new Date();
+
+    try {
+      const result = await this.prismaService.appointment.updateMany({
+        where: {
+          status: 'activa',
+          date: { lt: now }, // Si la fecha de la cita es menor a la hora actual
+        },
+        data: {
+          status: 'finalizada',
+        },
+      });
+
+      if (result.count > 0) {
+        this.logger.log(`Se han actualizado ${result.count} citas vencidas a estatus 'finalizada'.`);
+      }
+    } catch (error) {
+      this.logger.error('Error al actualizar citas finalizadas:', error);
+    }
+  }
+
+  /**
    * Tarea programada que se ejecuta automáticamente cada 30 minutos.
    * Escanea la base de datos en busca de citas activas proyectadas en las próximas 24 horas,
    * envía un correo electrónico de recordatorio al paciente y actualiza la bandera `reminderSent`.
-   * 
-   * @returns {Promise<void>} No retorna ningún valor, el proceso corre en segundo plano.
    */
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleAppointmentReminders() {
@@ -34,11 +60,10 @@ export class AppointmentsCronService {
             gte: now,
             lte: targetTime,
           },
-          status: 'activa',    // estatus
-          reminderSent: false, // Campo de la migración para evitar duplicados
+          status: 'activa',
+          reminderSent: false,
         },
         include: {
-          // Extraer el correo del paciente
           patients: {
             include: {
               patient: true, 
@@ -53,10 +78,8 @@ export class AppointmentsCronService {
       }
 
       for (const appointment of upcomingAppointments) {
-        // Extraemos al paciente
         const patientData = appointment.patients[0]?.patient;
 
-        // Si por alguna razón no hay paciente o correo, saltamos al siguiente
         if (!patientData || !patientData['email']) continue;
 
         const formattedTime = appointment.date.toLocaleTimeString('es-MX', {
@@ -73,14 +96,12 @@ export class AppointmentsCronService {
         const subject = 'Sinergia App: Recordatorio de Cita Médica';
         const message = `Hola,\n\nTe recordamos que tienes una cita de fisioterapia el día ${formattedDate} a las ${formattedTime}.\n\nPor favor, recuerda llegar 10 minutos antes.\n\nSaludos,\nClínica Sinergia.`;
         
-        // Se envía correo
         const success = await this.notificationsService.sendEmail(
           patientData['email'],
           subject,
           message,
         );
 
-        // Actualizar la base de datos SÓLO si el correo salió con éxito
         if (success) {
           await this.prismaService.appointment.update({
             where: { id: appointment.id },
