@@ -1,16 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 
 @Injectable()
 export class MedicalRecordService {
-  update(id: string, updateDto: UpdateMedicalRecordDto) {
-    throw new Error('Method not implemented.');
-  }
   constructor(private readonly prismaService: PrismaService) {}
 
-  // Tickety 1: El administrador puede crear un expediente clínico
+  // busqueda de paciente por el id
+  async findPatientById(id: string) {
+    const patient = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+
+    if (!patient) {
+      throw new NotFoundException('No se encontró ningún paciente con ese ID');
+    }
+
+    const age = patient.birthDate 
+      ? new Date().getFullYear() - new Date(patient.birthDate).getFullYear() 
+      : 0;
+
+    return {
+      id: patient.id,
+      name: patient.name,
+      email: patient.email,
+      age: age.toString(),
+    };
+  }
+
+  // Creación del expediente
   async create(createMedicalRecordDto: CreateMedicalRecordDto) {
     return this.prismaService.medicalRecord.create({
       data: {
@@ -22,4 +41,7 @@ export class MedicalRecordService {
     });
   }
 
+  update(id: string, updateDto: UpdateMedicalRecordDto) {
+    throw new Error('Method not implemented.');
+  }
 }
