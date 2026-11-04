@@ -5,6 +5,7 @@ import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 
 @Injectable()
 export class MedicalRecordService {
+  
   constructor(private readonly prismaService: PrismaService) {}
 
   // busqueda de paciente por el id
@@ -41,7 +42,11 @@ export class MedicalRecordService {
     });
   }
 
-  update(id: string, updateDto: UpdateMedicalRecordDto) {
-    throw new Error('Method not implemented.');
+  // Ticket 2: El administrador puede editar un expediente clínico
+  async update(id: string, updateDto: any) {
+    return this.prismaService.medicalRecord.update({
+      where: { id },
+      data: updateDto,
+    });
   }
 }
