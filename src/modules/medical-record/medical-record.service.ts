@@ -31,7 +31,9 @@ export class MedicalRecordService {
   }
 
   // Creación del expediente
+  
   async create(createMedicalRecordDto: CreateMedicalRecordDto) {
+    console.log('DTO recibido:', createMedicalRecordDto); //verifico que datos llegan al al servidor desde la app
     return this.prismaService.medicalRecord.create({
       data: {
         patientId: createMedicalRecordDto.patientId,
