@@ -53,4 +53,26 @@ export class MedicalRecordsController {
 
     return this.medicalRecordsService.update(id, updateDto);
   }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Req() req: any) {
+    const user = req.user;
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException('Solo los administradores pueden ver los expedientes clínicos.');
+    }
+    return this.medicalRecordsService.findAll();
+  }
+
+  // Endpoint para detalle individual
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    const user = req.user;
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException('Solo los administradores pueden consultar este expediente.');
+    }
+    return this.medicalRecordsService.findOne(id);
+  }
 }
+
