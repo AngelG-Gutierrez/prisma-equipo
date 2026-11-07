@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
@@ -31,4 +31,34 @@ export class MedicalRecordsController {
 
     return this.medicalRecordsService.create(createDto);
   }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Req() req: any) {
+    const user = req.user;
+
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException(
+        'Solo los administradores pueden consultar lo   ... esta bien?s expedientes clínicos.',
+      );
+    }
+
+    return this.medicalRecordsService.findAll();
+  }
+
+  // Obtener un expediente clínico individual por ID
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    const user = req.user;
+
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException(
+        'Solo los administradores pueden consultar los expedientes clínicos.',
+      );
+    }
+
+    return this.medicalRecordsService.findOne(id);
+  }  
+  
 }
