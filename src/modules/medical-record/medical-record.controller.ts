@@ -2,7 +2,7 @@ import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, Unauthorized
 import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Ajusta la ruta según tu árbol de carpetas
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('create-medical-records')
 export class MedicalRecordsController {
