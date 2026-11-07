@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
@@ -17,9 +17,21 @@ export class MedicalRecordService {
       throw new NotFoundException('No se encontró ningún paciente con ese ID');
     }
 
-    const age = patient.birthDate 
-      ? new Date().getFullYear() - new Date(patient.birthDate).getFullYear() 
-      : 0;
+    const birthDate = new Date(patient.birthDate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const hasNotHadBirthday =
+      today.getMonth() < birthDate.getMonth() ||
+      (
+        today.getMonth() === birthDate.getMonth() &&
+        today.getDate() < birthDate.getDate()
+      );
+
+    if (hasNotHadBirthday) {
+      age--;
+    }
 
     return {
       id: patient.id,
@@ -31,6 +43,18 @@ export class MedicalRecordService {
 
   // Creación del expediente
   async create(createMedicalRecordDto: CreateMedicalRecordDto) {
+    const existingRecord = await this.prismaService.medicalRecord.findUnique({
+      where: {
+        patientId: createMedicalRecordDto.patientId,
+      },
+    });
+
+    if (existingRecord) {
+      throw new ConflictException(
+        'Este paciente ya cuenta con un expediente clínico.',
+      );
+    }
+
     return this.prismaService.medicalRecord.create({
       data: {
         patientId: createMedicalRecordDto.patientId,
@@ -40,7 +64,6 @@ export class MedicalRecordService {
       },
     });
   }
-
   update(id: string, updateDto: UpdateMedicalRecordDto) {
     throw new Error('Method not implemented.');
   }
