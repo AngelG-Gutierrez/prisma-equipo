@@ -11,6 +11,13 @@ export class MedicalRecordService {
   async findPatientById(id: string) {
     const patient = await this.prismaService.user.findUnique({
       where: { id },
+      include: {
+      medicalRecord: {
+        select: {
+          id: true,
+        },
+      },
+    },
     });
 
     if (!patient) {
@@ -38,7 +45,54 @@ export class MedicalRecordService {
       name: patient.name,
       email: patient.email,
       age: age.toString(),
+      hasMedicalRecord: !!patient.medicalRecord,
     };
+  }
+
+  // Obtener todos los expedientes clínicos  
+  async findAll() {
+    return this.prismaService.medicalRecord.findMany({
+      include: {
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            birthDate: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  // Obtener un expediente clínico individual por ID
+  async findOne(id: string) {
+    const record = await this.prismaService.medicalRecord.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            birthDate: true,
+          },
+        },
+      },
+    });
+
+    if (!record) {
+      throw new NotFoundException(
+        'No se encontró el expediente médico solicitado.',
+      );
+    }
+
+    return record;
   }
 
   // Creación del expediente
