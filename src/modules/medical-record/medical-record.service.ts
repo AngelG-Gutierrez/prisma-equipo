@@ -7,7 +7,7 @@ import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 export class MedicalRecordService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // Búsqueda del paciente por ID (para autocompletar el front)
+  // Búsqueda del paciente por ID
   async findPatientById(id: string) {
     const patient = await this.prismaService.user.findUnique({
       where: { id },
@@ -118,7 +118,53 @@ export class MedicalRecordService {
       },
     });
   }
-  update(id: string, updateDto: UpdateMedicalRecordDto) {
-    throw new Error('Method not implemented.');
+  
+  // Actualizar un expediente clínico
+  async update(id: string, updateDto: UpdateMedicalRecordDto) {
+    const existingRecord = await this.prismaService.medicalRecord.findUnique({
+      where: { id },
+    });
+
+    if (!existingRecord) {
+      throw new NotFoundException(
+        'No se encontró el expediente médico que deseas actualizar.',
+      );
+    }
+
+    return this.prismaService.medicalRecord.update({
+      where: { id },
+      data: updateDto,
+      include: {
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            birthDate: true,
+          },
+        },
+      },
+    });
+  }
+
+  // Eliminar un expediente clínico
+  async remove(id: string) {
+    const existingRecord = await this.prismaService.medicalRecord.findUnique({
+      where: { id },
+    });
+
+    if (!existingRecord) {
+      throw new NotFoundException(
+        'No se encontró el expediente médico que deseas eliminar.',
+      );
+    }
+
+    await this.prismaService.medicalRecord.delete({
+      where: { id },
+    });
+
+    return {
+      message: 'El expediente médico se eliminó correctamente.',
+    };
   }
 }

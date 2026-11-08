@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Req, UnauthorizedException, Patch, Delete } from '@nestjs/common';
 import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
@@ -60,5 +60,39 @@ export class MedicalRecordsController {
 
     return this.medicalRecordsService.findOne(id);
   }  
+
+  // Actualizar un expediente clínico
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  async update(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateMedicalRecordDto,
+    @Req() req: any,
+  ) {
+    const user = req.user;
+
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException(
+        'Solo los administradores pueden actualizar expedientes clínicos.',
+      );
+    }
+
+    return this.medicalRecordsService.update(id, updateDto);
+  }
+
+  // Eliminar un expediente clínico
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async remove(@Param('id') id: string, @Req() req: any) {
+    const user = req.user;
+
+    if (user.role !== 'Administrador') {
+      throw new UnauthorizedException(
+        'Solo los administradores pueden eliminar expedientes clínicos.',
+      );
+    }
+
+    return this.medicalRecordsService.remove(id);
+  }
   
 }
