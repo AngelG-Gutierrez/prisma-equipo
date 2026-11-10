@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/databases/prisma.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
-import { NotificationsService } from '../notifications/notifications.service'; 
+import { NotificationsService } from '../notifications/notifications.service';
+import { PushNotificationsService } from '../notifications/push-notifications.service';
 
 @Injectable()
 export class PrescriptionsService {
@@ -10,7 +11,8 @@ export class PrescriptionsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly notificationsService: NotificationsService,
-  ) {}
+    private readonly pushNotificationsService: PushNotificationsService,
+  ) { }
 
   async create(dto: CreatePrescriptionDto) {
     const prescription = await this.prismaService.prescription.create({
@@ -45,6 +47,23 @@ export class PrescriptionsService {
     } else {
       this.logger.warn(
         `No se encontró paciente con id ${dto.patientId}, no se envió notificación.`,
+      );
+    }
+
+    // Crear una notificación push cuando se asigna
+    // un nuevo ejercicio al paciente.
+    try {
+      await this.pushNotificationsService.sendNotification({
+        userId: dto.patientId,
+        type: 'EXERCISE_PLAN_ASSIGNED',
+        title: 'Nuevo plan de ejercicios',
+        body: `Se te ha asignado un nuevo ejercicio: ${prescription.exerciseName}`,
+        referenceId: prescription.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        'La prescripción se creó, pero falló la notificación push',
+        error instanceof Error ? error.stack : String(error),
       );
     }
 

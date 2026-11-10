@@ -7,14 +7,21 @@ import {
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PrismaService } from '../../core/databases/prisma.service';
 import { Appointment } from './appointment';
+import { Logger } from '@nestjs/common';
+import { PushNotificationsService } from '../notifications/push-notifications.service';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private prismaService: PrismaService) { }
+  private readonly logger = new Logger(AppointmentsService.name);
+
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly pushNotificationsService: PushNotificationsService,
+  ) { }
 
   /**
    * Crea una nueva cita para un paciente validando la disponibilidad del horario (RNF_04).
-   * 
+   *
    * @param {string} patientId - El identificador único del paciente que solicita la cita.
    * @param {CreateAppointmentDto} dto - Objeto con los datos necesarios para crear la cita.
    * @throws {BadRequestException} Si el horario seleccionado ya tiene una cita activa.
@@ -55,9 +62,9 @@ export class AppointmentsService {
   }
 
   /**
-   * Cancela una cita existente verificando que pertenezca al paciente solicitante 
+   * Cancela una cita existente verificando que pertenezca al paciente solicitante
    * y que se realice con al menos 24 horas de anticipación.
-   * 
+   *
    * @param {string} patientId - El identificador del paciente que intenta cancelar.
    * @param {string} appointmentId - El identificador de la cita a cancelar.
    * @throws {NotFoundException} Si la cita no existe en la base de datos.
@@ -101,7 +108,7 @@ export class AppointmentsService {
 
   /**
    * Obtiene un listado general de todas las citas registradas en el sistema.
-   * 
+   *
    * @returns {Promise<Appointment[]>} Un arreglo con todas las citas.
    */
   async findAll() {
@@ -125,7 +132,7 @@ export class AppointmentsService {
 
   /**
    * Obtiene las próximas citas activas de un paciente en específico, ordenadas cronológicamente.
-   * 
+   *
    * @param {string} patientId - El identificador del paciente.
    * @returns {Promise<Appointment[]>} Un arreglo con las futuras citas del paciente.
    */
@@ -139,5 +146,169 @@ export class AppointmentsService {
       },
       orderBy: { date: 'asc' },
     });
+  }
+
+  async assignDoctor(appointmentId: string, doctorId: string) {
+    const appointment = await this.prismaService.appointment.findUnique({
+      where: { id: appointmentId },
+      include: {
+        patients: true,
+        doctors: true,
+      },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException('La cita no existe.');
+    }
+
+    if (appointment.status !== 'activa') {
+      throw new BadRequestException('Solo se pueden asignar citas activas.');
+    }
+
+    if (appointment.patients.length === 0) {
+      throw new BadRequestException('La cita no tiene un paciente asociado.');
+    }
+
+    if (appointment.doctors.length > 0) {
+      throw new BadRequestException(
+        'La cita ya tiene un fisioterapeuta asignado.',
+      );
+    }
+
+    const doctor = await this.prismaService.user.findUnique({
+      where: { id: doctorId },
+    });
+
+    if (!doctor || !doctor.active || doctor.role !== 'Administrador') {
+      throw new BadRequestException(
+        'El fisioterapeuta no existe o no está autorizado.',
+      );
+    }
+
+    const assignedDoctor = await this.prismaService.doctorAppointment.create({
+      data: {
+        appointmentId,
+        doctorId,
+      },
+    });
+
+    try {
+      await this.pushNotificationsService.sendNotification({
+        userId: doctor.id,
+        type: 'APPOINTMENT_CREATED',
+        title: 'Nueva cita asignada',
+        body: `Se te ha asignado una cita para el ${appointment.date.toLocaleString(
+          'es-MX',
+          {
+            timeZone: 'America/Mexico_City',
+          },
+        )}.`,
+        referenceId: appointment.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        'La cita fue asignada, pero no se pudo generar la notificación.',
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+
+    return {
+      message: 'Fisioterapeuta asignado correctamente.',
+      appointmentId,
+      doctorId: assignedDoctor.doctorId,
+    };
+  }
+
+  async createByDoctor(
+    doctorId: string,
+    patientId: string,
+    date: string,
+    reason: string,
+  ) {
+    // Verificar al fisioterapeuta autenticado.
+    const doctor = await this.prismaService.user.findUnique({
+      where: { id: doctorId },
+    });
+
+    if (!doctor || !doctor.active || doctor.role !== 'Administrador') {
+      throw new ForbiddenException('No tienes permisos para programar citas.');
+    }
+
+    // Comprobar que el paciente existe.
+    const patient = await this.prismaService.user.findUnique({
+      where: { id: patientId },
+    });
+
+    if (!patient || !patient.active || patient.role !== 'Paciente') {
+      throw new NotFoundException('El paciente no existe o no está activo.');
+    }
+
+    const appointmentDate = new Date(date);
+
+    if (
+      Number.isNaN(appointmentDate.getTime()) ||
+      appointmentDate <= new Date()
+    ) {
+      throw new BadRequestException(
+        'Debes seleccionar una fecha futura válida.',
+      );
+    }
+
+    // Respetar la disponibilidad actual del sistema.
+    const existingAppointment = await this.prismaService.appointment.findFirst({
+      where: {
+        date: appointmentDate,
+        status: 'activa',
+      },
+    });
+
+    if (existingAppointment) {
+      throw new BadRequestException('El horario seleccionado ya está ocupado.');
+    }
+
+    // Crear la cita asociando al paciente y fisioterapeuta.
+    const appointment = await this.prismaService.appointment.create({
+      data: {
+        date: appointmentDate,
+        reason,
+        status: 'activa',
+        patients: {
+          create: {
+            patient: {
+              connect: { id: patientId },
+            },
+          },
+        },
+        doctors: {
+          create: {
+            doctor: {
+              connect: { id: doctorId },
+            },
+          },
+        },
+      },
+    });
+
+    // Guardar aviso y solicitar su envío push al paciente.
+    // Un fallo de notificación no cancela la cita.
+    try {
+      await this.pushNotificationsService.sendNotification({
+        userId: patientId,
+        type: 'APPOINTMENT_ASSIGNED',
+        title: 'Nueva cita programada',
+        body: `Tu fisioterapeuta te programó una cita para el ${appointmentDate.toLocaleString(
+          'es-MX',
+          { timeZone: 'America/Mexico_City' },
+        )}.`,
+        referenceId: appointment.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        'La cita se creó, pero falló la notificación al paciente.',
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+
+    return appointment;
   }
 }
