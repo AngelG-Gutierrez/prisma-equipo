@@ -111,8 +111,28 @@ export class AppointmentsService {
    *
    * @returns {Promise<Appointment[]>} Un arreglo con todas las citas.
    */
+
+  //Estructura modificada para incluir información de pacientes y fisioterapeutas asociados a cada cita
   async findAll() {
-    return this.prismaService.appointment.findMany();
+    return this.prismaService.appointment.findMany({
+      include: {
+        patients: {
+          include: {
+            patient: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                birthDate: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    });
   }
 
   /**
