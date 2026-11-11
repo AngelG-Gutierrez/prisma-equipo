@@ -41,7 +41,7 @@ class AssignDoctorDto {
   })
   @IsString()
   @IsNotEmpty()
-  doctorId: string;
+  doctorId!: string;
 }
 
 // =========================================================
@@ -54,14 +54,14 @@ class CreateAppointmentByDoctorDto {
   })
   @IsString()
   @IsNotEmpty()
-  patientId: string;
+  patientId!: string;
 
   @ApiProperty({
     example: '2026-11-10T16:00:00.000Z',
     description: 'Fecha y hora de la cita en formato ISO',
   })
   @IsDateString()
-  date: string;
+  date!: string;
 
   @ApiProperty({
     example: 'Sesión de fisioterapia',
@@ -69,7 +69,7 @@ class CreateAppointmentByDoctorDto {
   })
   @IsString()
   @IsNotEmpty()
-  reason: string;
+  reason!: string;
 }
 
 // =========================================================
@@ -200,7 +200,7 @@ export class AppointmentsController {
   })
   @Get()
   @Roles('Administrador', 'Paciente')
-  async findAll(@Req() req: any): Promise<Appointment[]> {
+  findAll(): Promise<Appointment[]> {
     return this.appointmentsService.findAll();
   }
 
