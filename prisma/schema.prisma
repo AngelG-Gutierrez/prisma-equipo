@@ -93,6 +93,9 @@ model Prescription {
   frequency    String // Frecuencia / repeticiones
   mediaUrl     String? // Multimedia (integración de API externa)
 
+  duration     String?  // Duración estimada
+  equipment    String? // Material o equipo necesario
+
   createdAt DateTime @default(now())
 }
 
