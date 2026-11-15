@@ -1,4 +1,9 @@
-import { IsString, IsNotEmpty, IsOptional, IsUrl } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsUrl,
+} from 'class-validator';
 
 export class CreatePrescriptionDto {
   @IsString()
@@ -16,6 +21,14 @@ export class CreatePrescriptionDto {
   @IsString()
   @IsNotEmpty()
   frequency: string;
+
+  @IsString()
+  @IsNotEmpty()
+  duration: string;
+
+  @IsOptional()
+  @IsString()
+  equipment?: string;
 
   @IsOptional()
   @IsUrl()
