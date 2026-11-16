@@ -169,13 +169,25 @@ export class PrescriptionsService {
       },
     });
 
-    return patients.map((patient) => ({
+    const result = patients.map((patient) => ({
       id: patient.id,
       name: patient.name,
       exercisesCount: patient.prescriptions.length,
       prescriptions: patient.prescriptions,
       lastAssignedAt: patient.prescriptions[0]?.createdAt ?? null,
     }));
+
+    return result.sort((a, b) => {
+      const dateA = a.lastAssignedAt
+        ? new Date(a.lastAssignedAt).getTime()
+        : 0;
+
+      const dateB = b.lastAssignedAt
+        ? new Date(b.lastAssignedAt).getTime()
+        : 0;
+
+      return dateB - dateA;
+    });
   }
 
   // Consultar una prescripción individual
