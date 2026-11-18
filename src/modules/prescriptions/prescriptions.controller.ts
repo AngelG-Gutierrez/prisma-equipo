@@ -81,4 +81,11 @@ export class PrescriptionsController {
   async remove(@Param('id') id: string) {
     return this.prescriptionsService.remove(id);
   }
+
+  // Contar todas las prescripciones creadas
+  @Roles('Administrador')
+  @Get('admin/count')
+  async countAll() {
+    return this.prescriptionsService.countAll();
+  }
 }
