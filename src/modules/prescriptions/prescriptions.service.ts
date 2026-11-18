@@ -257,4 +257,8 @@ export class PrescriptionsService {
       id,
     };
   }
+
+  async countAll() {
+    return this.prismaService.prescription.count();
+  }
 }
